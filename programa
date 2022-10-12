@@ -1,0 +1,84 @@
+import funcoes
+
+filas = 12
+cadeiras = 8
+lugares = funcoes.criacao_matriz(filas, cadeiras)
+lugares = funcoes.preenche_matriz(lugares)
+op = 1
+
+#exibição do menu de opções
+while op != 0:
+    print('\n1 - Cadastro de Cliente')
+    print('2 - Consulta de Cliente')
+    print('3 - Reserva de Cadeira')
+    print('4 - Cancelamento de Reserva de Cadeira')
+    print('5 - Relatorio de Reservas')
+    print('6 - Relatório de Cadeiras Livres')
+    print('7 - Relatorio de Cancelamento de Reservas de Cadeiras')
+    print('    (Digite 0 para sair)')
+
+    op = int(input('\nDigite a opção escolhida: '))
+
+    #cadastro de novo cliente
+    if op == 1:
+        cpf_cliente = input('CPF do cliente: ')
+        checa_cpf = funcoes.consulta_cliente(cpf_cliente)
+        if checa_cpf:
+            print('Cliente já cadastrado!'+"\n"+checa_cpf)
+            continue
+        nome_cliente = str(input('Nome do cliente: '))
+        funcoes.cadastro_cliente(nome_cliente, cpf_cliente)
+
+    #consulta se cliente está cadastrado
+    elif op == 2:
+        cliente_cpf = input('CPF do cliente: ')
+        reserva = funcoes.consulta_cliente(cliente_cpf)
+        if reserva == False:
+            print('Cliente não cadastrado!')
+        else:
+            print('Cliente cadastrado!'+"\n"+reserva)
+
+    #reserva de cadeira
+    elif op == 3:
+        try:
+            reserva_fila = int(input('Fila: '))
+            assert 1 <= reserva_fila <= filas
+            reserva_cadeira = int(input('Cadeira: '))
+            assert 1 <= reserva_cadeira <= cadeiras
+
+            if funcoes.consulta_reserva_cadeira(lugares, reserva_fila, reserva_cadeira):
+                print('Essa cadeira já está reservada!')
+
+            else:
+                cpf_cliente = input('CPF do cliente: ')
+                checa_cpf = funcoes.consulta_cliente(cpf_cliente)
+                if not checa_cpf:
+                    print("Cliente não está cadastrado!\nCPF: "+cpf_cliente)
+                    continue
+                else:
+                    funcoes.reserva_cadeira_cliente(cpf_cliente, reserva_fila, reserva_cadeira)
+                    lugares = funcoes.reserva_cadeira(lugares, reserva_fila, reserva_cadeira)
+                    funcoes.impressao_matriz(lugares)
+                    nome_cliente = funcoes.consulta_cliente(cpf_cliente)
+                    print(f'\nCadeira: [{reserva_fila}] Fila: [{reserva_cadeira}] reservada para o cliente:\n{nome_cliente}')
+        except AssertionError:
+            print('Informação inválida')
+
+    #cancelamento de cadeira
+    elif op == 4:
+        cancela_cpf = (input('Qual CPF para cancelar?'))
+        cancela_reserva = funcoes.excluir_reserva(cancela_cpf)
+        lugares = funcoes.criacao_matriz(filas, cadeiras)
+        lugares = funcoes.preenche_matriz(lugares)
+
+    #impressão de relatório de reservas
+    elif op == 5:
+        funcoes.relatorio_reservas()
+
+    #impressãode matriz para vizualização de assentos livres
+    elif op == 6:
+        funcoes.impressao_matriz(lugares)
+
+    #impressão de relatório de cancelamento
+    elif op == 7:
+        funcoes.relatorio_cancelamento()
