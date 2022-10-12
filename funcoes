@@ -1,0 +1,142 @@
+import os.path
+
+#função para criação de matriz
+def criacao_matriz(fila, cadeira):
+    matriz = []
+    for i in range(fila):
+        linha = []
+        disponivel = '-'
+        for j in range(cadeira):
+            linha.append(disponivel)
+        matriz.append(linha)
+    return matriz
+
+#função para preencher a matriz
+def preenche_matriz(matriz):
+    arquivo_reserva = 'reservas_clientes.txt'
+    if os.path.isfile(arquivo_reserva):
+        linha_arquivo = {}
+        linha_inicial = 1
+        with open(arquivo_reserva) as f:
+            conteudo = f.readlines()
+        for linha in conteudo:
+            linha_arquivo[linha_inicial] = linha.strip()
+            reserva_cliente = linha_arquivo[linha_inicial].split(' ')
+            fila = int(reserva_cliente[3])
+            cadeira = int(reserva_cliente[5])
+            matriz[fila - 1][cadeira - 1] = reserva_cliente[1]
+            # matriz[fila][cadeira] = x
+            linha_inicial += 1
+        f.close()
+    return matriz
+
+#funcção para impressão de matriz
+def impressao_matriz(matriz):
+    matriz = preenche_matriz(matriz)
+    cadeiras = ''
+    print('Mapa de Cadeiras' + "\n")
+    for i in range(len(matriz)):
+        for j in range(len(matriz[i])):
+            if j == 0:
+                if (i + 1) < 10:
+                    fila = '0' + str(i + 1)
+                else:
+                    fila = str(i + 1)
+                cadeiras += '[' + fila + ']' + "\t"
+            cadeiras += matriz[i][j] + "\t"
+        cadeiras += "\n"
+    print(cadeiras)
+
+#funcção para consultar se o assento já foi reservado
+def consulta_reserva_cadeira(matriz, fila, cadeira):
+    if matriz[fila - 1][cadeira - 1] == '-':
+        return False
+    else:
+        return True
+
+#função para cadastro de cliente
+def cadastro_cliente(nome, cpf):
+    arq_cad = open('cad_clientes.txt', 'a')
+    arq_cad.write(f'Nome: {nome} CPF: {cpf}\n')
+    arq_cad.close()
+
+#função para consultar se o cliente está cadastrado no sistema
+def consulta_cliente(cpf):
+    procurar = cpf
+    linha_inicial = 1
+    linha_arquivo = {}
+    with open('cad_clientes.txt') as f:
+        conteudo = f.readlines()
+    for linha in conteudo:
+        linha_arquivo[linha_inicial] = linha.strip()
+        if procurar in linha_arquivo[linha_inicial]:
+            f.close()
+            return linha_arquivo[linha_inicial]
+        else:
+            linha_inicial += 1
+    return False
+    f.close()
+
+#função para reservar o assento na matriz
+def reserva_cadeira(matriz, fila, cadeira):
+    matriz[fila - 1][cadeira - 1] = '✔'
+    return matriz
+
+#função para cadastrar a reserva no arquivo
+def reserva_cadeira_cliente(cpf, fila, cadeira):
+    arq_reserva = open('reservas_clientes.txt', 'a')
+    arq_reserva.write(f'CPF: {cpf} Fila: {fila} Cadeira: {cadeira}\n')
+    arq_reserva.close()
+
+#função para consultar se o cliente já está cadastrado
+def consulta_cliente_reserva(cpf):
+    procurar = cpf
+    proc_cpf = open('cad_clientes.txt', 'r')
+    readfile = proc_cpf.read()
+    if procurar not in readfile:
+        print('\nCliente não cadastrado!')
+        return False
+
+#função para excluir reserva
+def excluir_reserva(cancela_cpf):
+    nome_do_arquivo = 'reservas_clientes.txt'
+    linha_arquivo = {}
+    linha_inicial = 0
+    conteudo_novo = ''
+    with open(nome_do_arquivo) as f:
+        conteudo = f.readlines()
+        for linha in conteudo:
+            linha_arquivo[linha_inicial] = linha.strip()
+            reserva_cliente = linha_arquivo[linha_inicial].split(' ')
+            reserva_cpf = reserva_cliente[1]
+            if cancela_cpf == reserva_cpf:
+                f = open('relatorio_cancelamento.txt', "a")
+                f.write('\n' + (linha_arquivo[linha_inicial]))
+                print('\nReserva cancelada:')
+                print(linha_arquivo[linha_inicial])
+                f.close()
+            else:
+                conteudo_novo += linha_arquivo[linha_inicial]
+            linha_inicial += 1
+        f = open(nome_do_arquivo, "w")
+        f.write(conteudo_novo)
+        f.close()
+
+#função para imprimir o relatório de reservas
+def relatorio_reservas():
+    arquivo_reserva = 'reservas_clientes.txt'
+    if not os.path.isfile(arquivo_reserva):
+        print('Arquivo reservas de clientes não existe!')
+        return False
+    else:
+        arquivo = open(arquivo_reserva, 'r')
+        for linhas in arquivo.readlines():
+            print(linhas)
+        arquivo.close()
+
+#função para imprimir o relatorio de cancelamento
+def relatorio_cancelamento():
+    arquivo = open('relatorio_cancelamento.txt', 'r')
+    for linhas in arquivo.readlines():
+        print(linhas)
+    arquivo.close()
